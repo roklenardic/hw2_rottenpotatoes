@@ -7,12 +7,35 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @sort_by = nil # default sorting
+    @selected_ratings = [] #default rating filter
+    conditions = {}
+
     if params[:sort_by]
       @sort_by = params[:sort_by]
-      @movies = Movie.all(:order => @sort_by)
-    else
-      @movies = Movie.all
+      flash[:sort_by] = @sort_by
+    elsif flash[:sort_by]
+      @sort_by = flash[:sort_by]
+      flash[:sort_by] = @sort_by
     end
+
+    if params[:commit] == "Refresh"
+      if params[:ratings]
+        @selected_ratings = params[:ratings].keys
+      end
+      flash[:ratings] = @selected_ratings
+    elsif flash[:ratings]
+      @selected_ratings = flash[:ratings]
+      flash[:ratings] = @selected_ratings
+    end
+
+    if @selected_ratings.length > 0
+      conditions[:rating] = @selected_ratings
+      @movies = Movie.find(:all, :order => @sort_by, :conditions => conditions)
+    else
+      @movies = Movie.find(:all, :order => @sort_by)
+    end
+    @all_ratings = Movie.find(:all, :select => "DISTINCT rating")
   end
 
   def new
