@@ -24,8 +24,8 @@ class MoviesController < ApplicationController
     if params[:commit] == "Refresh"
       if params[:ratings]
         @selected_ratings = params[:ratings].keys
+        session[:ratings] = @selected_ratings
       end
-      session[:ratings] = @selected_ratings
     elsif session[:ratings]
       @selected_ratings = session[:ratings]
       if not params[:ratings]
@@ -42,6 +42,7 @@ class MoviesController < ApplicationController
       conditions[:rating] = @selected_ratings
       @movies = Movie.find(:all, :order => @sort_by, :conditions => conditions)
     else
+      session.delete(:ratings)
       @movies = Movie.find(:all, :order => @sort_by)
     end
     @all_ratings = Movie.find(:all, :select => "DISTINCT rating")
