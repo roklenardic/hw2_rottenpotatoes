@@ -46,7 +46,7 @@ class MoviesController < ApplicationController
     end
     @all_ratings = Movie.find(:all, :select => "DISTINCT rating")
 
-    if (not params[:sort_by] or not params[:ratings]) and not redirect_params.empty?
+    if ((session[:sort_by] and not params[:sort_by]) or (session[:ratings] and not params[:ratings])) and not redirect_params.empty?
       redirect_to movies_path + '?' + redirect_params
     end
     #ratings%5BPG%5D=1&ratings%5BPG-13%5D=1&ratings%5BR%5D=1
