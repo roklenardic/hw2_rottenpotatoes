@@ -15,10 +15,11 @@ class MoviesController < ApplicationController
     if params[:sort_by]
       @sort_by = params[:sort_by]
       session[:sort_by] = @sort_by
+      redirect_params += 'sort_by=' + @sort_by
     elsif session[:sort_by]
       @sort_by = session[:sort_by]
+      redirect_params += 'sort_by=' + @sort_by
     end
-    redirect_params += 'sort_by=' + @sort_by
 
     if params[:commit] == "Refresh"
       if params[:ratings]
