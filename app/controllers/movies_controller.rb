@@ -10,23 +10,31 @@ class MoviesController < ApplicationController
     @sort_by = nil # default sorting
     @selected_ratings = [] #default rating filter
     conditions = {}
+    redirect_params = ''
 
     if params[:sort_by]
       @sort_by = params[:sort_by]
-      flash[:sort_by] = @sort_by
-    elsif flash[:sort_by]
-      @sort_by = flash[:sort_by]
-      flash[:sort_by] = @sort_by
+      session[:sort_by] = @sort_by
+    elsif session[:sort_by]
+      @sort_by = session[:sort_by]
     end
+    redirect_params += 'sort_by=' + session[:sort_by]
 
     if params[:commit] == "Refresh"
       if params[:ratings]
         @selected_ratings = params[:ratings].keys
       end
-      flash[:ratings] = @selected_ratings
-    elsif flash[:ratings]
-      @selected_ratings = flash[:ratings]
-      flash[:ratings] = @selected_ratings
+      session[:ratings] = @selected_ratings
+    elsif session[:ratings]
+      @selected_ratings = session[:ratings]
+      if not params[:ratings]
+        @selected_ratings.each do |rating|
+          if not redirect_params.empty?
+            redirect_params += '&'
+          end
+          redirect_params += 'ratings[%s]=1' % rating
+        end
+      end
     end
 
     if @selected_ratings.length > 0
@@ -36,6 +44,11 @@ class MoviesController < ApplicationController
       @movies = Movie.find(:all, :order => @sort_by)
     end
     @all_ratings = Movie.find(:all, :select => "DISTINCT rating")
+
+    if (not params[:sort_by] or not params[:ratings]) and not redirect_params.empty?
+      redirect_to movies_path + '?' + redirect_params
+    end
+    #ratings%5BPG%5D=1&ratings%5BPG-13%5D=1&ratings%5BR%5D=1
   end
 
   def new
